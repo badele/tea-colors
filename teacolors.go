@@ -44,6 +44,8 @@ var base16 = []string{
 	"white",
 }
 
+var maxwidth int
+
 type PadDirection int
 
 const (
@@ -79,14 +81,6 @@ func StrPad(direction PadDirection, text string, width int) string {
 
 // Show colors panel
 func ShowANSIColorsPanel(profile termenv.Profile, nbcolors int, colors []string) {
-	maxwidth := 0
-	for _, colname := range base16 {
-		size := len(colname)
-		if size > maxwidth {
-			maxwidth = size
-		}
-	}
-
 	// Show ANSI Colors
 	if nbcolors <= 16 {
 		sep := ""
@@ -143,6 +137,11 @@ func ShowANSIColorsPanel(profile termenv.Profile, nbcolors int, colors []string)
 	}
 }
 
+func ShowGrayColorsPanel(profile termenv.Profile, nbcolors int, colors []string) {
+	// Grays:     232  233  234  235  236  237  238  239  240  241  242  243
+	// 244  245  246  247  248  249  250  251  252  253  254  255
+}
+
 func main() {
 	// Init termenv
 	restoreConsole, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
@@ -157,5 +156,14 @@ func main() {
 		colors = append(colors, fmt.Sprintf("%d", i))
 	}
 
+	maxwidth = 0
+	for _, colname := range base16 {
+		size := len(colname)
+		if size > maxwidth {
+			maxwidth = size
+		}
+	}
+
 	ShowANSIColorsPanel(termenv.ANSI, 16, colors)
+	ShowGrayColorsPanel(termenv.ANSI, 256, colors)
 }
