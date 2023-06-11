@@ -1,4 +1,5 @@
 teacolors
+dist/
 
 # Devenv
 .devenv*

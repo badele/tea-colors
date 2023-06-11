@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"unicode/utf8"
@@ -44,7 +45,7 @@ var base16 = []string{
 	"white",
 }
 
-var maxwidth int
+var colwidth, allwidth int
 
 type PadDirection int
 
@@ -80,66 +81,85 @@ func StrPad(direction PadDirection, text string, width int) string {
 }
 
 // Show colors panel
-func ShowANSIColorsPanel(profile termenv.Profile, nbcolors int, colors []string) {
+func ShowANSI16ColorsPanel(profile termenv.Profile, colors []string) {
 	// Show ANSI Colors
-	if nbcolors <= 16 {
-		sep := ""
+	nbcolors := 16
+	sep := ""
 
-		// ###################################################################
-		// # Band colors
-		// ###################################################################
-		bandsize := ((maxwidth + 1) * nbcolors) / (nbcolors / 2)
-		fmt.Printf(StrPad(RIGHT, "", maxwidth))
-		for idx := 0; idx < nbcolors/2; idx += 1 {
-			fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
-		}
-		fmt.Println()
+	// ###################################################################
+	// # Band colors
+	// ###################################################################
+	bandsize := ((colwidth + 1) * nbcolors) / (nbcolors / 2)
+	fmt.Printf(StrPad(RIGHT, "", colwidth))
+	for idx := 0; idx < nbcolors/2; idx += 1 {
+		fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
+	}
+	fmt.Println()
 
-		fmt.Printf(StrPad(RIGHT, "", maxwidth))
-		for idx := nbcolors / 2; idx < nbcolors; idx += 1 {
-			fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
-		}
-		fmt.Println()
+	fmt.Printf(StrPad(RIGHT, "", colwidth))
+	for idx := nbcolors / 2; idx < nbcolors; idx += 1 {
+		fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
+	}
+	fmt.Println()
 
-		// ###################################################################
-		// # Colors name
-		// ###################################################################
-		fmt.Printf(StrPad(RIGHT, "ANSI", maxwidth))
-		for idx := 0; idx < nbcolors; idx += 1 {
-			fmt.Printf("%s %s", sep, StrPad(CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), maxwidth))
-		}
-		fmt.Println()
+	// ###################################################################
+	// # Colors name
+	// ###################################################################
+	fmt.Printf(StrPad(RIGHT, "ANSI", colwidth))
+	for idx := 0; idx < nbcolors; idx += 1 {
+		fmt.Printf("%s %s", sep, StrPad(CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), colwidth))
+	}
+	fmt.Println()
 
-		fmt.Printf(StrPad(RIGHT, "Color", maxwidth))
-		for idx := 0; idx < nbcolors; idx += 1 {
-			fmt.Printf("%s %s", sep, termenv.String(StrPad(CENTER, base16[idx], maxwidth)).Foreground(profile.Color(colors[idx])))
-		}
-		fmt.Println()
+	fmt.Printf(StrPad(RIGHT, "Color", colwidth))
+	for idx := 0; idx < nbcolors; idx += 1 {
+		fmt.Printf("%s %s", sep, termenv.String(StrPad(CENTER, base16[idx], colwidth)).Foreground(profile.Color(colors[idx])))
+	}
+	fmt.Println()
 
-		// ###################################################################
-		// # Colors block
-		// ###################################################################
-		for row := 0; row < nbcolors; row += 1 {
-			fmt.Printf(StrPad(RIGHT, base16[row], maxwidth))
-			for col := 0; col < nbcolors; col += 1 {
-				fmt.Printf("%s %s", sep, termenv.String(StrPad(CENTER, "•••", maxwidth)).Foreground(profile.Color(colors[row])).Background(profile.Color(colors[col])))
-			}
-			fmt.Println()
+	// ###################################################################
+	// # Colors block
+	// ###################################################################
+	for row := 0; row < nbcolors; row += 1 {
+		fmt.Printf(StrPad(RIGHT, base16[row], colwidth))
+		for col := 0; col < nbcolors; col += 1 {
+			fmt.Printf("%s %s", sep, termenv.String(StrPad(CENTER, "•••", colwidth)).Foreground(profile.Color(colors[row])).Background(profile.Color(colors[col])))
 		}
-
-		// Print colorname (in same color)
-		fmt.Printf(StrPad(RIGHT, "Color", maxwidth))
-		for idx := 0; idx < nbcolors; idx += 1 {
-			fmt.Printf("%s %s", sep, StrPad(CENTER, base16[idx], maxwidth))
-		}
-		fmt.Println()
 		fmt.Println()
 	}
+
+	// Print colorname (in same color)
+	fmt.Printf(StrPad(RIGHT, "Color", colwidth))
+	for idx := 0; idx < nbcolors; idx += 1 {
+		fmt.Printf("%s %s", sep, StrPad(CENTER, base16[idx], colwidth))
+	}
+	fmt.Println()
+	fmt.Println()
 }
 
-func ShowGrayColorsPanel(profile termenv.Profile, nbcolors int, colors []string) {
-	// Grays:     232  233  234  235  236  237  238  239  240  241  242  243
-	// 244  245  246  247  248  249  250  251  252  253  254  255
+func ShowGrayColorsPanel(profile termenv.Profile) {
+	nbcolors := 255 - 232
+	bandsize := ((colwidth + 1) * nbcolors) / 16
+
+	allspaces := (allwidth - (bandsize * ((nbcolors / 2) + 1)))
+
+	fmt.Printf(StrPad(RIGHT, "", allspaces))
+	for idx := 232; idx <= 232+nbcolors/2; idx += 1 {
+		fmt.Printf("%s", termenv.String(StrPad(CENTER, strconv.Itoa(idx), bandsize)).
+			Background(profile.Color(strconv.Itoa(idx))).
+			Foreground(profile.Color("15")),
+		)
+	}
+	fmt.Println()
+
+	fmt.Printf(StrPad(RIGHT, "", allspaces))
+	for idx := 232 + nbcolors/2 + 1; idx <= 255; idx += 1 {
+		fmt.Printf("%s", termenv.String(StrPad(CENTER, strconv.Itoa(idx), bandsize)).
+			Background(profile.Color(strconv.Itoa(idx))).
+			Foreground(profile.Color("0")),
+		)
+	}
+	fmt.Println()
 }
 
 func main() {
@@ -156,14 +176,15 @@ func main() {
 		colors = append(colors, fmt.Sprintf("%d", i))
 	}
 
-	maxwidth = 0
+	colwidth = 0
 	for _, colname := range base16 {
 		size := len(colname)
-		if size > maxwidth {
-			maxwidth = size
+		if size > colwidth {
+			colwidth = size
 		}
 	}
+	allwidth = ((colwidth + 1) * 17) - 2
 
-	ShowANSIColorsPanel(termenv.ANSI, 16, colors)
-	ShowGrayColorsPanel(termenv.ANSI, 256, colors)
+	ShowANSI16ColorsPanel(termenv.ANSI, colors)
+	ShowGrayColorsPanel(termenv.ANSI256)
 }
