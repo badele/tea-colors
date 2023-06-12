@@ -26,7 +26,7 @@ import (
 	"github.com/muesli/termenv"
 )
 
-var base16 = []string{
+var colornames = []string{
 	"black",
 	"maroon",
 	"green",
@@ -45,7 +45,18 @@ var base16 = []string{
 	"white",
 }
 
-var colwidth, allwidth int
+var textstyles = []string{
+	"Normal",
+	"Bold",
+	"Faint",
+	"Italic",
+	"Overline",
+	"CrossOut",
+	"Underline",
+	"Blink",
+}
+
+var startposx, maxcolnamewidth, allwidth int
 
 type PadDirection int
 
@@ -80,6 +91,29 @@ func StrPad(direction PadDirection, text string, width int) string {
 	return output
 }
 
+func ShowANSIColorBar(profile termenv.Profile, colors []string) {
+	nbcolors := 16
+
+	// ###################################################################
+	// # Band colors
+	// ###################################################################
+	bandsize := allwidth / (nbcolors / 2)
+	spaces := (allwidth - (bandsize * (nbcolors / 2))) / 2
+
+	fmt.Printf(StrPad(RIGHT, "", startposx+spaces))
+	for idx := 0; idx < nbcolors/2; idx += 1 {
+		fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
+	}
+	fmt.Println()
+
+	fmt.Printf(StrPad(RIGHT, "", startposx+spaces))
+	for idx := nbcolors / 2; idx < nbcolors; idx += 1 {
+		fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
+	}
+	fmt.Println()
+
+}
+
 // Show colors panel
 func ShowANSI16ColorsPanel(profile termenv.Profile, colors []string) {
 	// Show ANSI Colors
@@ -87,63 +121,70 @@ func ShowANSI16ColorsPanel(profile termenv.Profile, colors []string) {
 	sep := ""
 
 	// ###################################################################
-	// # Band colors
-	// ###################################################################
-	bandsize := ((colwidth + 1) * nbcolors) / (nbcolors / 2)
-	fmt.Printf(StrPad(RIGHT, "", colwidth))
-	for idx := 0; idx < nbcolors/2; idx += 1 {
-		fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
-	}
-	fmt.Println()
-
-	fmt.Printf(StrPad(RIGHT, "", colwidth))
-	for idx := nbcolors / 2; idx < nbcolors; idx += 1 {
-		fmt.Printf("%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(colors[idx])))
-	}
-	fmt.Println()
-
-	// ###################################################################
 	// # Colors name
 	// ###################################################################
-	fmt.Printf(StrPad(RIGHT, "ANSI", colwidth))
+	// Print colorname (in same color)
+	fmt.Printf(StrPad(RIGHT, "ANSI", startposx))
 	for idx := 0; idx < nbcolors; idx += 1 {
-		fmt.Printf("%s %s", sep, StrPad(CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), colwidth))
+		fmt.Printf("%s %s", sep, StrPad(CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), maxcolnamewidth))
 	}
 	fmt.Println()
-
-	fmt.Printf(StrPad(RIGHT, "Color", colwidth))
+	fmt.Printf(StrPad(RIGHT, "Color", startposx))
 	for idx := 0; idx < nbcolors; idx += 1 {
-		fmt.Printf("%s %s", sep, termenv.String(StrPad(CENTER, base16[idx], colwidth)).Foreground(profile.Color(colors[idx])))
+		fmt.Printf("%s %s", sep, StrPad(CENTER, colornames[idx], maxcolnamewidth))
 	}
 	fmt.Println()
 
 	// ###################################################################
 	// # Colors block
 	// ###################################################################
-	for row := 0; row < nbcolors; row += 1 {
-		fmt.Printf(StrPad(RIGHT, base16[row], colwidth))
+	for row, _ := range colors {
+		fmt.Printf(StrPad(RIGHT, colornames[row], startposx))
 		for col := 0; col < nbcolors; col += 1 {
-			fmt.Printf("%s %s", sep, termenv.String(StrPad(CENTER, "•••", colwidth)).Foreground(profile.Color(colors[row])).Background(profile.Color(colors[col])))
+			fmt.Printf("%s %s", sep, termenv.String(StrPad(CENTER, "•••", maxcolnamewidth)).Foreground(profile.Color(colors[row])).Background(profile.Color(colors[col])))
 		}
 		fmt.Println()
 	}
+}
 
-	// Print colorname (in same color)
-	fmt.Printf(StrPad(RIGHT, "Color", colwidth))
-	for idx := 0; idx < nbcolors; idx += 1 {
-		fmt.Printf("%s %s", sep, StrPad(CENTER, base16[idx], colwidth))
+// Show colors panel
+func ShowTextStylePanel(profile termenv.Profile, colors []string) {
+	nbcolors := 16
+	sep := ""
+
+	for row, _ := range textstyles {
+		fmt.Printf(StrPad(RIGHT, textstyles[row], startposx))
+		for col := 0; col < nbcolors; col += 1 {
+			termfunc := termenv.String(StrPad(CENTER, "ABC", maxcolnamewidth)).Foreground(profile.Color(colors[col]))
+			switch textstyles[row] {
+			case "Bold":
+				fmt.Printf("%s %s", sep, termfunc.Bold())
+			case "Faint":
+				fmt.Printf("%s %s", sep, termfunc.Faint())
+			case "Italic":
+				fmt.Printf("%s %s", sep, termfunc.Italic())
+			case "CrossOut":
+				fmt.Printf("%s %s", sep, termfunc.CrossOut())
+			case "Underline":
+				fmt.Printf("%s %s", sep, termfunc.Underline())
+			case "Overline":
+				fmt.Printf("%s %s", sep, termfunc.Overline())
+			case "Blink":
+				fmt.Printf("%s %s", sep, termfunc.Blink())
+			default:
+				fmt.Printf("%s %s", sep, termfunc)
+			}
+		}
+		fmt.Println()
 	}
-	fmt.Println()
-	fmt.Println()
 }
 
 func ShowGrayColorsPanel(profile termenv.Profile) {
 	nbcolors := 255 - 232
-	bandsize := ((colwidth + 1) * nbcolors) / 16
+	bandsize := allwidth / ((nbcolors + 1) / 2)
+	spaces := (allwidth - (bandsize * (nbcolors / 2))) / 2
 
-	allspaces := (allwidth - (bandsize * ((nbcolors / 2) + 1)))
-
-	fmt.Printf(StrPad(RIGHT, "", allspaces))
+	fmt.Printf(StrPad(RIGHT, "", startposx+spaces-2))
 	for idx := 232; idx <= 232+nbcolors/2; idx += 1 {
 		fmt.Printf("%s", termenv.String(StrPad(CENTER, strconv.Itoa(idx), bandsize)).
 			Background(profile.Color(strconv.Itoa(idx))).
@@ -152,7 +193,7 @@ func ShowGrayColorsPanel(profile termenv.Profile) {
 	}
 	fmt.Println()
 
-	fmt.Printf(StrPad(RIGHT, "", allspaces))
+	fmt.Printf(StrPad(RIGHT, "", startposx+spaces-2))
 	for idx := 232 + nbcolors/2 + 1; idx <= 255; idx += 1 {
 		fmt.Printf("%s", termenv.String(StrPad(CENTER, strconv.Itoa(idx), bandsize)).
 			Background(profile.Color(strconv.Itoa(idx))).
@@ -176,15 +217,30 @@ func main() {
 		colors = append(colors, fmt.Sprintf("%d", i))
 	}
 
-	colwidth = 0
-	for _, colname := range base16 {
+	maxcolnamewidth = 0
+	for _, colname := range colornames {
 		size := len(colname)
-		if size > colwidth {
-			colwidth = size
+		if size > maxcolnamewidth {
+			maxcolnamewidth = size
 		}
 	}
-	allwidth = ((colwidth + 1) * 17) - 2
 
+	startposx = 0
+	for _, colname := range textstyles {
+		size := len(colname)
+		if size > startposx {
+			startposx = size
+		}
+	}
+
+	if startposx < maxcolnamewidth {
+		startposx = maxcolnamewidth
+	}
+
+	allwidth = ((maxcolnamewidth + 1) * 16) - 2
+
+	ShowANSIColorBar(termenv.ANSI, colors)
 	ShowANSI16ColorsPanel(termenv.ANSI, colors)
+	ShowTextStylePanel(termenv.ANSI, colors)
 	ShowGrayColorsPanel(termenv.ANSI256)
 }
