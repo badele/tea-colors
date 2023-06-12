@@ -1,5 +1,6 @@
 teacolors
 dist/
+coverage.out
 
 # Devenv
 .devenv*

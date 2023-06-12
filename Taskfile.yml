@@ -10,6 +10,11 @@ tasks:
     cmds: 
       - rm -rf dist
 
+  test:
+    desc: Build all cmd
+    cmds:
+      - go test ./... -coverprofile=coverage.out *.go ; go tool cover -func=coverage.out ; go tool cover -html=coverage.out
+
   build:
     desc: Build all cmd
     cmds:
