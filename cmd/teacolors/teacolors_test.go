@@ -20,56 +20,42 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/badele/tea-colors/internal/pkg/ansi"
+	"github.com/badele/tea-colors/internal/pkg/tools"
 	"github.com/muesli/termenv"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStrPad(t *testing.T) {
-	left := StrPad(LEFT, "LEFT", 10)
+	left := tools.StrPad(tools.LEFT, "LEFT", 10)
 	assert.Equal(t, "LEFT      ", left)
 
-	right := StrPad(RIGHT, "RIGHT", 10)
+	right := tools.StrPad(tools.RIGHT, "RIGHT", 10)
 	assert.Equal(t, "     RIGHT", right)
 
-	center := StrPad(CENTER, "CENTER", 10)
+	center := tools.StrPad(tools.CENTER, "CENTER", 10)
 	assert.Equal(t, "  CENTER  ", center)
 
-	biggest := StrPad(CENTER, "TOO BIGGEST", 10)
+	biggest := tools.StrPad(tools.CENTER, "TOO BIGGEST", 10)
 	assert.Equal(t, "TOO BIGGEST", biggest)
 
 }
 
 func TestGetGlobalConf(t *testing.T) {
-	onelist := []string{
-		"one",
-		"five",
-		"two",
-	}
-
-	twolist := []string{
-		"one",
-		"eleven",
-		"two",
-	}
-
 	// onelist, twolist order
-	globalconfig = GetGlobalConf(onelist, twolist)
-	assert.Equal(t, globalconfig.maxcolnamewidth, 4)
-	assert.Equal(t, globalconfig.startposx, 6)
+	assert.Equal(t, ansi.GetMaxColorNameWidth(), 7) // magenta
+	assert.Equal(t, ansi.GetMaxStyleNameWidth(), 9) // underline
 
 	// twolist, onelist order
-	globalconfig = GetGlobalConf(twolist, onelist)
-	assert.Equal(t, globalconfig.maxcolnamewidth, 6)
-	assert.Equal(t, globalconfig.startposx, 6)
+	assert.Equal(t, ansi.GetStartPosX(), 9)
 
-	allwidth := ((globalconfig.maxcolnamewidth + 1) * 16) - 2
-	assert.Equal(t, globalconfig.allwidth, allwidth)
+	AllWidth := (ansi.GetMaxColorNameWidth() + 1) * 16
+	assert.Equal(t, ansi.GetAllWidth(), AllWidth)
 }
 
 func TestShowANSIColorBar(t *testing.T) {
 
-	globalconfig = GetGlobalConf(COLORNAMES, TEXTSTYLES)
-	output := ShowANSIColorBar(termenv.ANSI)
+	output := ansi.GetANSIColorBar(termenv.ANSI)
 	lines := strings.Split(output, "\n")
 
 	// Test two row band colors (3 newlines)
@@ -77,19 +63,17 @@ func TestShowANSIColorBar(t *testing.T) {
 }
 
 func TestShowANSI16ColorsPanel(t *testing.T) {
-	globalconfig = GetGlobalConf(COLORNAMES, TEXTSTYLES)
-	output := ShowANSI16ColorsPanel(termenv.ANSI)
+	output := ansi.GetANSI16ColorsPanel(termenv.ANSI)
 	lines := strings.Split(output, "\n")
 
 	// test colors
-	assert.Contains(t, lines[2], "\x1b[30;41m")  // Black(background Red) line
-	assert.Contains(t, lines[9], "\x1b[37;42")   // Silver/(background Green) line
-	assert.Contains(t, lines[17], "\x1b[97;43m") // White/(background Yellow) line
+	assert.Contains(t, lines[4], "\x1b[30;41m")  // Black(background Red) line
+	assert.Contains(t, lines[11], "\x1b[37;42")  // Silver/(background Green) line
+	assert.Contains(t, lines[19], "\x1b[97;43m") // White/(background Yellow) line
 }
 
 func TestShowTextStylePanel(t *testing.T) {
-	globalconfig = GetGlobalConf(COLORNAMES, TEXTSTYLES)
-	output := ShowTextStylePanel(termenv.ANSI)
+	output := ansi.GetTextStylePanel(termenv.ANSI)
 	lines := strings.Split(output, "\n")
 
 	// test styles
@@ -98,8 +82,7 @@ func TestShowTextStylePanel(t *testing.T) {
 }
 
 func TestShowGrayColorsPanel(t *testing.T) {
-	globalconfig = GetGlobalConf(COLORNAMES, TEXTSTYLES)
-	output := ShowGrayColorsPanel(termenv.ANSI)
+	output := ansi.GetGrayColorsPanel(termenv.ANSI)
 	lines := strings.Split(output, "\n")
 
 	// Test two row band colors (3 newlines)
@@ -111,5 +94,5 @@ func TestOutputBar(t *testing.T) {
 	lines := strings.Split(output, "\n")
 
 	// All lines
-	assert.Equal(t, 30+1, len(lines))
+	assert.Equal(t, 47+1, len(lines))
 }

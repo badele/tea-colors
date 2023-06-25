@@ -6,6 +6,7 @@
     git
     goreleaser
     go-task
+    expect # Preserve color with unbuffer
   ];
 
   # https://devenv.sh/languages/

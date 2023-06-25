@@ -27,4 +27,4 @@ jobs:
         with:
           report: 'true'
           chart: 'true'
-          amend: 'false'
+          amend: 'true'
