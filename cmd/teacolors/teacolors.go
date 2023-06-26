@@ -27,6 +27,7 @@ import (
 
 	"github.com/badele/tea-colors/internal/pkg/ansi"
 	"github.com/badele/tea-colors/internal/pkg/scheme"
+	importer "github.com/badele/tea-colors/internal/pkg/scheme/importer/iterm2"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -349,13 +350,17 @@ func imports() {
 
 	newsschemes := scheme.Schemes{}
 
-	// Base16
-	schemeImporter = &scheme.SchemeBase16{}
+	// Wezterm
+	schemeImporter = &importer.SchemeWezterm{}
 	newsschemes = scheme.Import(newsschemes, schemeImporter)
 
-	// Gogh
-	schemeImporter = &scheme.SchemeGogh16{}
-	newsschemes = scheme.Import(newsschemes, schemeImporter)
+	// // Base16
+	// schemeImporter = &importer.SchemeBase16{}
+	// newsschemes = scheme.Import(newsschemes, schemeImporter)
+
+	// // Gogh
+	// schemeImporter = &importer.SchemeGogh{}
+	// newsschemes = scheme.Import(newsschemes, schemeImporter)
 
 	// newsschemes.Read("/tmp/scheme.txt")
 
@@ -367,42 +372,43 @@ func imports() {
 
 func main() {
 
-	imports()
-	return
+	// imports()
+	// return
 
-	test := scheme.SchemeBase16{}
-	links := test.GetRessouresList()
-	fmt.Println(links)
-	return
+	// test := importer.SchemeBase16{}
+	// links := test.GetRessouresList()
+	// fmt.Println(links)
+	// return
 	// fmt.Print(OutputBar())
 	// return
 
 	// Load some text for our viewport
 	content := strings.Repeat(OutputBar()+"\n", 5)
 
+	newsschemes := scheme.Schemes{}
+	newsschemes.Read("schemes.txt")
 	items := []list.Item{
-		item{title: "Nutella", desc: "It's good on toast"},
-		item{title: "Bitter melon", desc: "It cools you down"},
-		item{title: "Nice socks", desc: "And by that I mean socks without holes"},
-		item{title: "Eight hours of sleep", desc: "I had this once"},
-		item{title: "Cats", desc: "Usually"},
-		item{title: "Plantasia, the album", desc: "My plants love it too"},
-		item{title: "Pour over coffee", desc: "It takes forever to make though"},
-		item{title: "VR", desc: "Virtual reality...what is there to say?"},
-		item{title: "Noguchi Lamps", desc: "Such pleasing organic forms"},
-		item{title: "Linux", desc: "Pretty much the best OS"},
-		item{title: "Business school", desc: "Just kidding"},
-		item{title: "Pottery", desc: "Wet clay is a great feeling"},
-		item{title: "Shampoo", desc: "Nothing like clean hair"},
-		item{title: "Table tennis", desc: "It’s surprisingly exhausting"},
-		item{title: "Milk crates", desc: "Great for packing in your extra stuff"},
-		item{title: "Afternoon tea", desc: "Especially the tea sandwich part"},
-		item{title: "Stickers", desc: "The thicker the vinyl the better"},
-		item{title: "20° Weather", desc: "Celsius, not Fahrenheit"},
-		item{title: "Warm light", desc: "Like around 2700 Kelvin"},
-		item{title: "The vernal equinox", desc: "The autumnal equinox is pretty good too"},
-		item{title: "Gaffer’s tape", desc: "Basically sticky fabric"},
-		item{title: "Terrycloth", desc: "In other words, towel fabric"},
+		item{title: "Current", desc: "[40m [0m[41m [0m[42m [0m[43m [0m[44m [0m[45m [0m[46m [0m[47m [0m[100m [0m[101m [0m[102m [0m[103m [0m[104m [0m[105m [0m[106m [0m[107m [0m"},
+	}
+
+	for _, scheme := range newsschemes {
+		cols := []lipgloss.Style{}
+		for i := 0; i < 8; i++ {
+			colstyle := lipgloss.NewStyle().
+				SetString(" ").
+				Background(lipgloss.Color(scheme.Normal[i]))
+
+			cols = append(cols, colstyle)
+		}
+		for i := 0; i < 8; i++ {
+			colstyle := lipgloss.NewStyle().
+				SetString(" ").
+				Background(lipgloss.Color(scheme.Brights[i]))
+
+			cols = append(cols, colstyle)
+		}
+
+		items = append(items, item{title: scheme.Name, desc: fmt.Sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", cols[0], cols[1], cols[2], cols[3], cols[4], cols[5], cols[6], cols[7], cols[8], cols[9], cols[10], cols[11], cols[12], cols[13], cols[14], cols[15])})
 	}
 
 	m := modelpreview{

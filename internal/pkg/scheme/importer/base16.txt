@@ -1,10 +1,11 @@
-package scheme
+package importer
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
 
+	"github.com/badele/tea-colors/internal/pkg/scheme"
 	"github.com/badele/tea-colors/internal/pkg/tools"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/go-yaml/yaml"
@@ -86,7 +87,7 @@ func (s *SchemeBase16) GetRessouresList() []string {
 	return links
 }
 
-func (s *SchemeBase16) ImportRessources(ressources []string, schemes Schemes) Schemes {
+func (s *SchemeBase16) ImportRessources(ressources []string, schemes scheme.Schemes) scheme.Schemes {
 	for _, url := range ressources {
 
 		resp, err := tools.GetHttpContent(url)
@@ -95,28 +96,35 @@ func (s *SchemeBase16) ImportRessources(ressources []string, schemes Schemes) Sc
 		err = yaml.Unmarshal([]byte(resp), s)
 		tools.CheckError(err)
 
-		newsscheme := Scheme{
-			Source: base16_source,
-			Name:   s.Scheme,
-			Author: s.Author,
-			Colors: []lipgloss.Color{
-				lipgloss.Color(getHexaColor(s.Base00)),
-				lipgloss.Color(getHexaColor(s.Base01)),
-				lipgloss.Color(getHexaColor(s.Base02)),
-				lipgloss.Color(getHexaColor(s.Base03)),
-				lipgloss.Color(getHexaColor(s.Base04)),
-				lipgloss.Color(getHexaColor(s.Base05)),
-				lipgloss.Color(getHexaColor(s.Base06)),
-				lipgloss.Color(getHexaColor(s.Base07)),
-				lipgloss.Color(getHexaColor(s.Base08)),
-				lipgloss.Color(getHexaColor(s.Base09)),
-				lipgloss.Color(getHexaColor(s.Base0A)),
-				lipgloss.Color(getHexaColor(s.Base0B)),
-				lipgloss.Color(getHexaColor(s.Base0C)),
-				lipgloss.Color(getHexaColor(s.Base0D)),
-				lipgloss.Color(getHexaColor(s.Base0E)),
-				lipgloss.Color(getHexaColor(s.Base0F)),
+		newsscheme := scheme.Scheme{
+			Source:     base16_source,
+			Name:       s.Scheme,
+			Author:     s.Author,
+			Foreground: lipgloss.Color(scheme.GetHexaColor("")),
+			Background: lipgloss.Color(scheme.GetHexaColor("")),
+			Normal: []lipgloss.Color{
+				lipgloss.Color(scheme.GetHexaColor(s.Base00)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base01)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base02)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base03)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base04)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base05)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base06)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base07)),
 			},
+			Bright: []lipgloss.Color{
+				lipgloss.Color(scheme.GetHexaColor(s.Base08)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base09)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base0A)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base0B)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base0C)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base0D)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base0E)),
+				lipgloss.Color(scheme.GetHexaColor(s.Base0F)),
+			},
+			Cursor:               lipgloss.Color(scheme.GetHexaColor("")),
+			Selection_Foreground: lipgloss.Color(scheme.GetHexaColor("")),
+			Selection_Background: lipgloss.Color(scheme.GetHexaColor("")),
 		}
 		schemes = append(schemes, newsscheme)
 	}

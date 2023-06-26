@@ -5,22 +5,29 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/o1egl/fwencoder"
 )
 
 type Scheme struct {
-	Name   string
-	Source string
-	Colors []lipgloss.Color
-	Author string
+	Name        string
+	Source      string
+	Application string
+	Foreground  string
+	Background  string
+	Normal      []string
+	Brights     []string
+	CursorFg    string
+	CursorBg    string
+	SelectionFg string
+	SelectionBg string
+	Author      string
 }
 
-func getHexaColor(color string) string {
-	r, _ := regexp.Compile(`#?([0-9A-F]{6})`)
+func GetHexaColor(color string) string {
+	r, _ := regexp.Compile(`#?([0-9A-Fa-f]{6})`)
 	if match := r.MatchString(strings.ToUpper(color)); match == true {
 		groups := r.FindStringSubmatch(strings.ToUpper(color))
-		return "#" + groups[1]
+		return "#" + strings.ToUpper(groups[1])
 	}
 
 	return ""

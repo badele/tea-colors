@@ -3,12 +3,13 @@ module github.com/badele/tea-colors
 go 1.20
 
 require (
+	github.com/BurntSushi/toml v1.3.2
 	github.com/charmbracelet/bubbles v0.16.1
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/lipgloss v0.7.1
-	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/gocolly/colly v1.2.0
 	github.com/muesli/termenv v0.15.1
+	github.com/o1egl/fwencoder v0.1.0
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -33,7 +34,6 @@ require (
 	github.com/muesli/ansi v0.0.0-20211018074035-2e021307bc4b // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
-	github.com/o1egl/fwencoder v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/sahilm/fuzzy v0.1.0 // indirect
@@ -45,6 +45,5 @@ require (
 	golang.org/x/term v0.9.0 // indirect
 	golang.org/x/text v0.10.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
