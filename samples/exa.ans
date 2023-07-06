@@ -1,19 +1,19 @@
 exa - A modern replacement for ls.
-[4mPermissions[0m [4mSize[0m [4mUser[0m   [4mDate Modified[0m [4mName[0m
-[1;34md[33mr[31mw[32mx[0m[33mr[38;5;244m-[32mx[33mr[38;5;244m-[32mx[0m     [38;5;244m-[0m [1;33mbadele[0m [34m17 Jun 07:33[0m  [1;34m.devenv[0m
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m  [1;32m3,4[0m[32mk[0m [1;33mbadele[0m [34m17 Jun 07:33[0m  .devenv.flake.nix
-[1;34md[33mr[31mw[32mx[0m[33mr[38;5;244m-[32mx[33mr[38;5;244m-[32mx[0m     [38;5;244m-[0m [1;33mbadele[0m [34m13 Jun 07:49[0m  [1;34m.direnv[0m
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m   [1;32m176[0m [1;33mbadele[0m [34m11 Jun 08:54[0m  .envrc
-[1;34md[33mr[31mw[32mx[0m[33mr[38;5;244m-[32mx[33mr[38;5;244m-[32mx[0m     [38;5;244m-[0m [1;33mbadele[0m [34m14 Jun 22:34[0m  [1;34m.git[0m
-[1;34md[33mr[31mw[32mx[0m[33mr[38;5;244m-[32mx[33mr[38;5;244m-[32mx[0m     [38;5;244m-[0m [1;33mbadele[0m [34m11 Jun 08:44[0m  [1;34m.github[0m
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m    [1;32m98[0m [1;33mbadele[0m [34m12 Jun 22:03[0m  .gitignore
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m  [1;32m1,2[0m[32mk[0m [1;33mbadele[0m [34m11 Jun 08:48[0m  .goreleaser.yaml
-[1;36ml[33mr[31mw[32mx[0m[33mr[31mw[32mx[33mr[31mw[32mx[0m    [1;32m66[0m [1;33mbadele[0m [34m11 Jun 08:56[0m  [1;36m.pre-commit-config.yaml[0m [38;5;244m->[0m [36m/nix/store/[0mpre-commit-config.json
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m  [1;32m149[0m[32mk[0m [1;33mbadele[0m [34m12 Jun 07:42[0m  [1;35mansi_preview.png[0m
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m   [1;32m261[0m [1;33mbadele[0m [34m12 Jun 22:03[0m  [1;4;33mREADME.md[0m
-[1;34md[33mr[31mw[32mx[0m[33mr[38;5;244m-[32mx[33mr[38;5;244m-[32mx[0m     [38;5;244m-[0m [1;33mbadele[0m [34m17 Jun 07:40[0m  [1;34msamples[0m
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m   [1;32m790[0m [1;33mbadele[0m [34m12 Jun 22:03[0m  Taskfile.yml
-.[1;33mr[31mw[4;32mx[0m[33mr[38;5;244m-[32mx[33mr[38;5;244m-[32mx[0m  [1;32m2,7[0m[32mM[0m [1;33mbadele[0m [34m13 Jun 13:44[0m  [1;32mtea-colors[0m
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m  [1;32m8,9[0m[32mk[0m [1;33mbadele[0m [34m16 Jun 23:44[0m  teacolors.go
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m  [1;32m3,2[0m[32mk[0m [1;33mbadele[0m [34m12 Jun 20:09[0m  teacolors_test.go
-.[1;33mr[31mw[0m[38;5;244m-[33mr[38;5;244m--[33mr[38;5;244m--[0m     [1;32m0[0m [1;33mbadele[0m [34m13 Jun 07:49[0m  untracked_file.txt
+[{BG}[4mPermissions[;{BG} [4mSize[;{BG} [4mUser[;{BG}   [4mDate Modified[;{BG} [4mName[;{BG}
+[1;34md[33mr[31mw[32mx[;{BG}[33mr[38;5;244m[{BG}-[32mx[33mr[38;5;244m[{BG}-[32mx[;{BG}     [38;5;244m[{BG}-[;{BG} [1;33mbadele[;{BG} [34m17 Jun 07:33[;{BG}  [1;34m.devenv[;{BG}
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}  [1;32m3,4[;{BG}[32mk[;{BG} [1;33mbadele[;{BG} [34m17 Jun 07:33[;{BG}  .devenv.flake.nix
+[1;34md[33mr[31mw[32mx[;{BG}[33mr[38;5;244m[{BG}-[32mx[33mr[38;5;244m[{BG}-[32mx[;{BG}     [38;5;244m[{BG}-[;{BG} [1;33mbadele[;{BG} [34m13 Jun 07:49[;{BG}  [1;34m.direnv[;{BG}
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}   [1;32m176[;{BG} [1;33mbadele[;{BG} [34m11 Jun 08:54[;{BG}  .envrc
+[1;34md[33mr[31mw[32mx[;{BG}[33mr[38;5;244m[{BG}-[32mx[33mr[38;5;244m[{BG}-[32mx[;{BG}     [38;5;244m[{BG}-[;{BG} [1;33mbadele[;{BG} [34m14 Jun 22:34[;{BG}  [1;34m.git[;{BG}
+[1;34md[33mr[31mw[32mx[;{BG}[33mr[38;5;244m[{BG}-[32mx[33mr[38;5;244m[{BG}-[32mx[;{BG}     [38;5;244m[{BG}-[;{BG} [1;33mbadele[;{BG} [34m11 Jun 08:44[;{BG}  [1;34m.github[;{BG}
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}    [1;32m98[;{BG} [1;33mbadele[;{BG} [34m12 Jun 22:03[;{BG}  .gitignore
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}  [1;32m1,2[;{BG}[32mk[;{BG} [1;33mbadele[;{BG} [34m11 Jun 08:48[;{BG}  .goreleaser.yaml
+[1;36ml[33mr[31mw[32mx[;{BG}[33mr[31mw[32mx[33mr[31mw[32mx[;{BG}    [1;32m66[;{BG} [1;33mbadele[;{BG} [34m11 Jun 08:56[;{BG}  [1;36m.pre-commit-config.yaml[;{BG} [38;5;244m[{BG}->[;{BG} [36m/nix/store/[;{BG}pre-commit-config.json
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}  [1;32m149[;{BG}[32mk[;{BG} [1;33mbadele[;{BG} [34m12 Jun 07:42[;{BG}  [1;35mansi_preview.png[;{BG}
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}   [1;32m261[;{BG} [1;33mbadele[;{BG} [34m12 Jun 22:03[;{BG}  [1;4;33mREADME.md[;{BG}
+[1;34md[33mr[31mw[32mx[;{BG}[33mr[38;5;244m[{BG}-[32mx[33mr[38;5;244m[{BG}-[32mx[;{BG}     [38;5;244m[{BG}-[;{BG} [1;33mbadele[;{BG} [34m17 Jun 07:40[;{BG}  [1;34msamples[;{BG}
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}   [1;32m790[;{BG} [1;33mbadele[;{BG} [34m12 Jun 22:03[;{BG}  Taskfile.yml
+.[1;33mr[31mw[4;32mx[;{BG}[33mr[38;5;244m[{BG}-[32mx[33mr[38;5;244m[{BG}-[32mx[;{BG}  [1;32m2,7[;{BG}[32mM[;{BG} [1;33mbadele[;{BG} [34m13 Jun 13:44[;{BG}  [1;32mtea-colors[;{BG}
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}  [1;32m8,9[;{BG}[32mk[;{BG} [1;33mbadele[;{BG} [34m16 Jun 23:44[;{BG}  teacolors.go
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}  [1;32m3,2[;{BG}[32mk[;{BG} [1;33mbadele[;{BG} [34m12 Jun 20:09[;{BG}  teacolors_test.go
+.[1;33mr[31mw[;{BG}[38;5;244m[{BG}-[33mr[38;5;244m[{BG}--[33mr[38;5;244m[{BG}--[;{BG}     [1;32m0[;{BG} [1;33mbadele[;{BG} [34m13 Jun 07:49[;{BG}  untracked_file.txt

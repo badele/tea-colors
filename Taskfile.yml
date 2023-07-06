@@ -32,4 +32,4 @@ tasks:
   run:
     desc: run
     cmds: 
-      - go run teacolors.go
+      - go run cmd/teacolors/teacolors.go

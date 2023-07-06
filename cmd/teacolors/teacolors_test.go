@@ -55,7 +55,7 @@ func TestGetGlobalConf(t *testing.T) {
 
 func TestShowANSIColorBar(t *testing.T) {
 
-	output := ansi.GetANSIColorBar(termenv.ANSI)
+	output := ansi.GetANSIColorBar()
 	lines := strings.Split(output, "\n")
 
 	// Test two row band colors (3 newlines)
@@ -63,7 +63,7 @@ func TestShowANSIColorBar(t *testing.T) {
 }
 
 func TestShowANSI16ColorsPanel(t *testing.T) {
-	output := ansi.GetANSI16ColorsPanel(termenv.ANSI)
+	output := ansi.GetANSI16ColorsPanel()
 	lines := strings.Split(output, "\n")
 
 	// test colors
@@ -73,7 +73,7 @@ func TestShowANSI16ColorsPanel(t *testing.T) {
 }
 
 func TestShowTextStylePanel(t *testing.T) {
-	output := ansi.GetTextStylePanel(termenv.ANSI)
+	output := ansi.GetTextStylePanel()
 	lines := strings.Split(output, "\n")
 
 	// test styles
@@ -94,5 +94,5 @@ func TestOutputBar(t *testing.T) {
 	lines := strings.Split(output, "\n")
 
 	// All lines
-	assert.Equal(t, 47+1, len(lines))
+	assert.Equal(t, 32+1, len(lines))
 }

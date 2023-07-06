@@ -33,8 +33,6 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-
-	"github.com/muesli/termenv"
 )
 
 /*
@@ -64,14 +62,16 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 type modelpreview struct {
-	content string
-	ready   bool
-
+	content    string
+	ready      bool
 	termwidth  int
 	termheight int
 	viewport   viewport.Model
 	list       list.Model
 	focusState SELECTEDFOCUS
+
+	previous_state  SELECTEDFOCUS
+	previous_offset int
 }
 
 func (m modelpreview) Init() tea.Cmd {
@@ -94,13 +94,6 @@ var (
 			Background(lipgloss.Color("0")).
 			Padding(0, 1).
 			MarginRight(1).
-			Render
-
-	lineStyle = lipgloss.NewStyle().
-			Foreground(lineColor).
-			Render
-	textStyle = lipgloss.NewStyle().Foreground(textColor).
-			Bold(true).
 			Render
 
 	verticalspace = lipgloss.NewStyle().
@@ -182,7 +175,23 @@ func (m modelpreview) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// m.viewport, cmd = m.viewport.Update(msg)
 	// cmds = append(cmds, cmd)
 
-	m.list, cmd = m.list.Update(msg)
+	if m.focusState != m.previous_state {
+		if m.focusState == FOCUSLIST {
+			m.previous_offset = m.viewport.YOffset
+		} else {
+			m.viewport.SetContent(m.content)
+			m.viewport.SetYOffset(m.previous_offset)
+		}
+
+		m.previous_state = m.focusState
+	}
+
+	if m.focusState == FOCUSLIST {
+		m.list, cmd = m.list.Update(msg)
+	} else {
+		m.viewport, cmd = m.viewport.Update(msg)
+	}
+
 	return m, cmd
 
 	// return m, tea.Batch(cmds...)
@@ -282,14 +291,25 @@ func CheckError(err error) {
 func TitleGenerator(text string, boxwidth int) string {
 	output := bytes.NewBufferString("")
 
-	size := len(text)
-	nbspaces := (boxwidth - size) / 2
+	size := len(text) + 2
+	leftspaces := (boxwidth - size) / 2
+	rightspaces := boxwidth - leftspaces - size
 
-	separatorline := lineStyle(strings.Repeat("─", nbspaces))
+	lineStyle := ansi.BG.
+		Foreground(lineColor)
 
-	fmt.Fprintln(output, "")
-	fmt.Fprintf(output, "%s %s %s\n", separatorline, textStyle(text), separatorline)
-	fmt.Fprintln(output, "")
+	textStyle := ansi.BG.
+		Foreground(lipgloss.Color(ansi.DEFAULTFOREGROUND)).
+		Bold(true)
+
+	leftline := lineStyle.Render(strings.Repeat("─", leftspaces))
+	rightline := lineStyle.Render(strings.Repeat("─", rightspaces))
+
+	title := fmt.Sprintf("\n%s%s%s", leftline, textStyle.Render(" "+text+" "), rightline)
+
+	// fmt.Fprintln(output, "")
+	fmt.Fprintf(output, title)
+	fmt.Fprintln(output, ansi.BG.Render(fmt.Sprintf("%s\n%s", ansi.ANSILINE, ansi.ANSILINE)))
 
 	return output.String()
 }
@@ -318,28 +338,38 @@ func getAnsiContentFile(filename string) string {
 
 	output := TitleGenerator(lines[0], ansi.GetFullSize())
 	for _, line := range lines[1:] {
-		output += fmt.Sprintf("%s\n", line)
+		output += fmt.Sprintf("%s%s\n", line, ansi.ANSILINE)
 	}
 
 	return output
 }
 
 func OutputBar() string {
-	restoreConsole, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
-	if err != nil {
-		panic(err)
-	}
-	defer restoreConsole()
-
-	output := ansi.GetANSIColorBar(termenv.ANSI)
-	output += ansi.GetANSI16ColorsPanel(termenv.ANSI)
-	output += ansi.GetTextStylePanel(termenv.ANSI)
-	output += ansi.GetGrayColorsPanel(termenv.ANSI256)
+	output := ansi.GetANSIColorBar()
+	output += ansi.GetANSI16ColorsPanel()
+	output += ansi.GetTextStylePanel()
+	output += ansi.GetGrayColorsPanel()
 
 	output += getAnsiContentFile("samples/duf.ans")
-	// output += OutputAnsiContentFile("samples/exa.ans")
-	// output += OutputAnsiContentFile("samples/git-status.ans")
-	// output += OutputAnsiContentFile("samples/man.ans")
+	output += getAnsiContentFile("samples/exa.ans")
+	output += getAnsiContentFile("samples/git-status.ans")
+	output += getAnsiContentFile("samples/man.ans")
+
+	// output += "\n\n"
+
+	// style := lipgloss.NewStyle().
+	// 	Background(lipgloss.Color("#448844")).
+	// 	Foreground(lipgloss.Color("#884488"))
+
+	r, g, b, _ := lipgloss.Color(ansi.DEFAULTBACKGROUND).RGBA()
+
+	output = strings.Replace(output, "44m", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
+	output = strings.Replace(output, "[91", fmt.Sprintf("[38;2;%d;%d;%d", r/256, g/256, b/256), -1)
+	output = strings.Replace(output, "91m", fmt.Sprintf("38;2;%d;%d;%dm", r/256, g/256, b/256), -1)
+	output = strings.Replace(output, "91;", fmt.Sprintf("38;2;%d;%d;%d;", r/256, g/256, b/256), -1)
+
+	// you must replace ( [0m or [m ) by [;{BG}
+	output = strings.Replace(output, "{BG}", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
 
 	return output
 }
@@ -370,6 +400,27 @@ func imports() {
 
 }
 
+func GetItemBarColor(colors []string) string {
+	bar := ""
+
+	// If not colors, generate ANSI color bar
+	if colors == nil {
+		for i := 0; i < 16; i++ {
+			colors = append(colors, fmt.Sprintf("%d", i))
+		}
+	}
+
+	for i := 0; i < 16; i++ {
+		colstyle := lipgloss.NewStyle().
+			SetString(" ").
+			Background(lipgloss.Color(colors[i]))
+
+		bar += fmt.Sprint(colstyle)
+	}
+
+	return bar
+}
+
 func main() {
 
 	// imports()
@@ -379,8 +430,8 @@ func main() {
 	// links := test.GetRessouresList()
 	// fmt.Println(links)
 	// return
-	// fmt.Print(OutputBar())
-	// return
+	fmt.Print(OutputBar())
+	return
 
 	// Load some text for our viewport
 	content := strings.Repeat(OutputBar()+"\n", 5)
@@ -388,27 +439,15 @@ func main() {
 	newsschemes := scheme.Schemes{}
 	newsschemes.Read("schemes.txt")
 	items := []list.Item{
-		item{title: "Current", desc: "[40m [0m[41m [0m[42m [0m[43m [0m[44m [0m[45m [0m[46m [0m[47m [0m[100m [0m[101m [0m[102m [0m[103m [0m[104m [0m[105m [0m[106m [0m[107m [0m"},
+		item{title: "Current", desc: GetItemBarColor(nil)},
 	}
 
 	for _, scheme := range newsschemes {
-		cols := []lipgloss.Style{}
-		for i := 0; i < 8; i++ {
-			colstyle := lipgloss.NewStyle().
-				SetString(" ").
-				Background(lipgloss.Color(scheme.Normal[i]))
+		colors := []string{}
+		colors = append(colors, scheme.Normal...)
+		colors = append(colors, scheme.Brights...)
 
-			cols = append(cols, colstyle)
-		}
-		for i := 0; i < 8; i++ {
-			colstyle := lipgloss.NewStyle().
-				SetString(" ").
-				Background(lipgloss.Color(scheme.Brights[i]))
-
-			cols = append(cols, colstyle)
-		}
-
-		items = append(items, item{title: scheme.Name, desc: fmt.Sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", cols[0], cols[1], cols[2], cols[3], cols[4], cols[5], cols[6], cols[7], cols[8], cols[9], cols[10], cols[11], cols[12], cols[13], cols[14], cols[15])})
+		items = append(items, item{title: scheme.Name, desc: GetItemBarColor(colors)})
 	}
 
 	m := modelpreview{

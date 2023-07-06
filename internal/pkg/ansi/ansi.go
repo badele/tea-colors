@@ -8,31 +8,43 @@ import (
 
 	"github.com/badele/tea-colors/internal/pkg/tools"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
 )
 
 // https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-var COLORNAMES = []string{
-	"black",
-	"red",
-	"green",
-	"yellow",
-	"blue",
-	"magenta",
-	"cyan",
-	"white",
-}
 
-var TEXTSTYLES = []string{
-	"normal",
-	"bold",
-	"faint",
-	"italic",
-	"overline",
-	"crossout",
-	"underline",
-	"blink",
-}
+// var DEFAULTBACKGROUND = "#2D2927"
+var (
+	ANSILINE          = "[K"
+	DEFAULTBACKGROUND = "#004427"
+	DEFAULTFOREGROUND = "#FBF1C7"
+
+	BG = lipgloss.NewStyle().
+		Background(lipgloss.Color(DEFAULTBACKGROUND))
+	FG = lipgloss.NewStyle().
+		Foreground(lipgloss.Color(DEFAULTBACKGROUND))
+
+	COLORNAMES = []string{
+		"black",
+		"red",
+		"green",
+		"yellow",
+		"blue",
+		"magenta",
+		"cyan",
+		"white",
+	}
+
+	TEXTSTYLES = []string{
+		"normal",
+		"bold",
+		"faint",
+		"italic",
+		"overline",
+		"crossout",
+		"underline",
+		"blink",
+	}
+)
 
 type GlobalConfig struct {
 	MaxColorNameWidth int
@@ -120,7 +132,7 @@ func GetFullSize() int {
 // 	return globalconfig
 // }
 
-func GetANSIColorBar(profile termenv.Profile) string {
+func GetANSIColorBar() string {
 	nbcolors := 16
 
 	// ###################################################################
@@ -128,125 +140,139 @@ func GetANSIColorBar(profile termenv.Profile) string {
 	// ###################################################################
 	bandsize := GetAllWidth() / (nbcolors / 2)
 	spaces := (GetAllWidth() - (bandsize * (nbcolors / 2))) / 2
+	style := lipgloss.NewStyle().
+		SetString(strings.Repeat(" ", bandsize))
 
 	output := bytes.NewBufferString("")
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces))
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces)))
 	for idx := 0; idx < nbcolors/2; idx += 1 {
-		fmt.Fprintf(output, "%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(strconv.Itoa(idx))))
-	}
-	fmt.Fprintf(output, "\n")
+		fmt.Fprintf(output, "%s", style.Background(lipgloss.Color(strconv.Itoa(idx))))
 
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces))
-	for idx := nbcolors / 2; idx < nbcolors; idx += 1 {
-		fmt.Fprintf(output, "%s", termenv.String(strings.Repeat(" ", bandsize)).Background(profile.Color(strconv.Itoa(idx))))
 	}
-	fmt.Fprintf(output, "\n")
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
+
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces)))
+	for idx := nbcolors / 2; idx < nbcolors; idx += 1 {
+		fmt.Fprintf(output, "%s", style.Background(lipgloss.Color(strconv.Itoa(idx))))
+	}
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "", GetFullSize())))
 
 	return output.String()
 }
 
 // Show colors panel
-func GetANSI16ColorsPanel(profile termenv.Profile) string {
+func GetANSI16ColorsPanel() string {
 	// Show ANSI Colors
 	nbcolors := 16
-	sep := ""
-
 	// ###################################################################
 	// # Colors name
 	// ###################################################################
 	output := bytes.NewBufferString("")
 
-	fmt.Fprintf(output, "\n")
-	fmt.Fprintf(output, lipgloss.JoinHorizontal(lipgloss.Center, tools.StrPad(tools.RIGHT, "", GetMaxStyleNameWidth()), tools.StrPad(tools.CENTER, "Normal", GetAllWidth()/2), " ", tools.StrPad(tools.CENTER, "Bright", GetAllWidth()/2)))
-	fmt.Fprintf(output, "\n")
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
+	fmt.Fprintf(output, lipgloss.JoinHorizontal(lipgloss.Center, BG.Render(tools.StrPad(tools.RIGHT, "", GetMaxStyleNameWidth())), BG.Render(tools.StrPad(tools.CENTER, "Normal", GetAllWidth()/2)), BG.Render(" "), BG.Render(tools.StrPad(tools.CENTER, "Bright", GetAllWidth()/2))))
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
 
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "ANSI", GetMaxStyleNameWidth()))
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "ANSI", GetMaxStyleNameWidth())))
 	for idx := 0; idx < nbcolors; idx += 1 {
-		fmt.Fprintf(output, "%s %s", sep, tools.StrPad(tools.CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), GetMaxColorNameWidth()))
+		fmt.Fprintf(output, "%s%s", BG.Render(" "), BG.Render(tools.StrPad(tools.CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), GetMaxColorNameWidth())))
 	}
-	fmt.Fprintf(output, "\n")
+	// fmt.Fprintf(output, BG.Render(" "))
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
 
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "Color", GetMaxStyleNameWidth()))
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "Color", GetMaxStyleNameWidth())))
 	for idx := 0; idx < nbcolors; idx += 1 {
-		fmt.Fprintf(output, "%s %s", sep, tools.StrPad(tools.CENTER, COLORNAMES[idx%(nbcolors/2)], GetMaxColorNameWidth()))
+		fmt.Fprintf(output, "%s%s", BG.Render(" "), BG.Render(tools.StrPad(tools.CENTER, COLORNAMES[idx%(nbcolors/2)], GetMaxColorNameWidth())))
 	}
-	fmt.Fprintf(output, "\n")
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
 
 	// ###################################################################
 	// # Colors block
 	// ###################################################################
 
+	style := lipgloss.NewStyle().
+		SetString(tools.StrPad(tools.CENTER, "•••", GetMaxColorNameWidth()))
+
 	for row := 0; row < nbcolors; row++ {
-		fmt.Fprintf(output, tools.StrPad(tools.RIGHT, COLORNAMES[row%(nbcolors/2)], GetMaxStyleNameWidth()))
+		fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, COLORNAMES[row%(nbcolors/2)], GetMaxStyleNameWidth())))
 		for col := 0; col < nbcolors; col += 1 {
-			fmt.Fprintf(output, "%s %s", sep, termenv.String(tools.StrPad(tools.CENTER, "•••", GetMaxColorNameWidth())).Foreground(profile.Color(strconv.Itoa(row))).Background(profile.Color(strconv.Itoa(col))))
+			fmt.Fprintf(output, "%s%s", BG.Render(" "), style.Foreground(lipgloss.Color(strconv.Itoa(row))).Background(lipgloss.Color(strconv.Itoa(col))))
 		}
-		fmt.Fprintf(output, "\n")
+		fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
 	}
 
 	return output.String()
 }
 
 // Show colors panel
-func GetTextStylePanel(profile termenv.Profile) string {
+func GetTextStylePanel() string {
 	nbcolors := 16
-	sep := ""
+
+	style := lipgloss.NewStyle().
+		SetString(tools.StrPad(tools.CENTER, tools.StrPad(tools.CENTER, "ABC", GetMaxColorNameWidth()), GetMaxColorNameWidth()))
 
 	output := bytes.NewBufferString("")
 	for row, _ := range TEXTSTYLES {
-		fmt.Fprintf(output, tools.StrPad(tools.RIGHT, TEXTSTYLES[row], GetMaxStyleNameWidth()))
+		fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, TEXTSTYLES[row], GetMaxStyleNameWidth())))
 		for col := 0; col < nbcolors; col += 1 {
-			termfunc := termenv.String(tools.StrPad(tools.CENTER, "ABC", GetMaxColorNameWidth())).Foreground(profile.Color(strconv.Itoa(col)))
+			termfunc := style.Foreground(lipgloss.Color(strconv.Itoa(col))).Background(lipgloss.Color(DEFAULTBACKGROUND))
 			switch TEXTSTYLES[row] {
 			case "bold":
-				fmt.Fprintf(output, "%s %s", sep, termfunc.Bold())
+				fmt.Fprintf(output, "%s%s", BG.Render(" "), termfunc.Bold(true))
 			case "faint":
-				fmt.Fprintf(output, "%s %s", sep, termfunc.Faint())
+				fmt.Fprintf(output, "%s%s", BG.Render(" "), termfunc.Faint(true))
 			case "italic":
-				fmt.Fprintf(output, "%s %s", sep, termfunc.Italic())
+				fmt.Fprintf(output, "%s%s", BG.Render(" "), termfunc.Italic(true))
 			case "crossOut":
-				fmt.Fprintf(output, "%s %s", sep, termfunc.CrossOut())
+				fmt.Fprintf(output, "%s%s", BG.Render(" "), termfunc.Strikethrough(true))
 			case "underline":
-				fmt.Fprintf(output, "%s %s", sep, termfunc.Underline())
-			case "overline":
-				fmt.Fprintf(output, "%s %s", sep, termfunc.Overline())
+				fmt.Fprintf(output, "%s%s", BG.Render(" "), termfunc.Underline(true))
+			// case "overline":
+			// 	fmt.Fprintf(output, "%s%s", bg.Render(" "), termfunc.Overline())
 			case "blink":
-				fmt.Fprintf(output, "%s %s", sep, termfunc.Blink())
+				fmt.Fprintf(output, "%s%s", BG.Render(" "), termfunc.Blink(true))
 			default:
-				fmt.Fprintf(output, "%s %s", sep, termfunc)
+				fmt.Fprintf(output, "%s%s", BG.Render(" "), termfunc)
 			}
 		}
-		fmt.Fprintf(output, "\n")
-
+		fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
 	}
 
 	return output.String()
 }
 
-func GetGrayColorsPanel(profile termenv.Profile) string {
-	nbcolors := 256 - 232
-	// bandsize := GetAllWidth() / ((nbcolors + 1) / 2)
-	// spaces := (GetAllWidth() - (bandsize * (nbcolors / 2))) / 2
+func GetGrayColorsPanel() string {
+	nbcolors := 256 - 232 // 24
 	bandsize := GetAllWidth() / (nbcolors / 2)
 	spaces := (GetAllWidth() - (bandsize * (nbcolors / 2))) / 2
 
 	output := bytes.NewBufferString("")
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces))
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces)))
 	for idx := 232; idx <= 232+nbcolors/2-1; idx += 1 {
-		fmt.Fprintf(output, "%s", termenv.String(tools.StrPad(tools.CENTER, strconv.Itoa(idx), bandsize)).
-			Background(profile.Color(strconv.Itoa(idx))).
-			Foreground(profile.Color("15")),
-		)
+		style := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("15")).
+			Background(lipgloss.Color(strconv.Itoa(idx))).
+			SetString(tools.StrPad(tools.CENTER, strconv.Itoa(idx), bandsize))
+
+		fmt.Fprintf(output, "%s", style)
 	}
-	fmt.Fprintf(output, "\n")
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces))
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "", GetFullSize()-(bandsize*(nbcolors/2))-GetStartPosX()-spaces-2)))
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
+
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces)))
 	for idx := 232 + nbcolors/2; idx <= 255; idx += 1 {
-		fmt.Fprintf(output, "%s", termenv.String(tools.StrPad(tools.CENTER, strconv.Itoa(idx), bandsize)).
-			Background(profile.Color(strconv.Itoa(idx))).
-			Foreground(profile.Color("0")),
-		)
+		style := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("0")).
+			Background(lipgloss.Color(strconv.Itoa(idx))).
+			SetString(tools.StrPad(tools.CENTER, strconv.Itoa(idx), bandsize))
+
+		fmt.Fprintf(output, "%s", style)
 	}
-	fmt.Fprintf(output, "\n")
+	fmt.Fprintf(output, BG.Render(tools.StrPad(tools.RIGHT, "", GetFullSize()-(bandsize*(nbcolors/2))-GetStartPosX()-spaces-2)))
+
+	fmt.Fprintf(output, BG.Render(ANSILINE)+"\n")
+	fmt.Fprintf(output, BG.Render(ANSILINE))
 
 	return output.String()
 }
