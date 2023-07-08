@@ -67,7 +67,7 @@ type modelpreview struct {
 	termwidth  int
 	termheight int
 	viewport   viewport.Model
-	list       list.Model
+	listview   list.Model
 	focusState SELECTEDFOCUS
 
 	previous_state  SELECTEDFOCUS
@@ -83,26 +83,23 @@ var (
 	lineColor = lipgloss.AdaptiveColor{Light: "0", Dark: "8"}
 
 	focusStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFDF5")).
-			Background(lipgloss.Color("5")).
+			Foreground(lipgloss.Color("7")).
 			Padding(0, 1).
 			MarginRight(1).
 			Render
 
 	unfocusStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("8")).
-			Background(lipgloss.Color("0")).
+			Foreground(lipgloss.Color("0")).
 			Padding(0, 1).
 			MarginRight(1).
 			Render
 
 	verticalspace = lipgloss.NewStyle().
-		// Border(lipgloss.NormalBorder(), false, true, false, false).
-		BorderForeground(lineColor).
-		MarginRight(2).
-		Height(8).
-		Width(2).
-		Render
+			BorderForeground(lineColor).
+			MarginRight(2).
+			Height(8).
+			Width(2).
+			Render
 
 	titleStyle = func() lipgloss.Style {
 		b := lipgloss.RoundedBorder()
@@ -120,7 +117,6 @@ var (
 func (m modelpreview) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd tea.Cmd
-		// cmds []tea.Cmd
 	)
 
 	switch msg := msg.(type) {
@@ -133,42 +129,23 @@ func (m modelpreview) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.WindowSizeMsg:
-		headerHeight := lipgloss.Height(m.headerView())
 		footerHeight := lipgloss.Height(m.footerView())
-		verticalMarginHeight := headerHeight + footerHeight + 1
-
-		//m.list.SetSize(msg.Width-ansi.GetFullSize(), msg.Height-v)
+		verticalMarginHeight := footerHeight + 1
 
 		if !m.ready {
 			m.termwidth = msg.Width
 			m.termheight = msg.Height
 
 			h, v := docStyle.GetFrameSize()
-			m.list.SetSize(m.termwidth-ansi.GetFullSize()-h, msg.Height-v)
+			m.listview.SetSize(m.termwidth-ansi.GetFullSize()-h, msg.Height-v+2)
 
-			m.viewport = viewport.New(ansi.GetFullSize(), msg.Height-verticalMarginHeight)
-			m.viewport.YPosition = headerHeight
-			// m.viewport.HighPerformanceRendering = false
+			m.viewport = viewport.New(ansi.GetFullSize(), msg.Height-verticalMarginHeight-1)
 			m.viewport.SetContent(m.content)
 			m.ready = true
-
-			// This is only necessary for high performance rendering, which in
-			// most cases you won't need.
-			//
-			// Render the viewport one line below the header.
-			m.viewport.YPosition = headerHeight + 1
 		} else {
 			m.viewport.Width = msg.Width
 			m.viewport.Height = msg.Height - verticalMarginHeight
 		}
-
-		// if useHighPerformanceRenderer {
-		// 	// Render (or re-render) the whole viewport. Necessary both to
-		// 	// initialize the viewport and when the window is resized.
-		// 	//
-		// 	// This is needed for high-performance rendering only.
-		// 	cmds = append(cmds, viewport.Sync(m.viewport))
-		// }
 	}
 
 	// Handle keyboard and mouse events in the viewport
@@ -187,26 +164,32 @@ func (m modelpreview) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	if m.focusState == FOCUSLIST {
-		m.list, cmd = m.list.Update(msg)
+		m.listview, cmd = m.listview.Update(msg)
 	} else {
 		m.viewport, cmd = m.viewport.Update(msg)
 	}
 
 	return m, cmd
-
-	// return m, tea.Batch(cmds...)
 }
 
-func (m modelpreview) GetFocusMenu() string {
-
-	liststyle := focusStyle
-	previewstyle := unfocusStyle
-	if m.focusState == FOCUSPREVIEW {
-		liststyle = unfocusStyle
-		previewstyle = focusStyle
+func (m modelpreview) GetMenuText(text string, focused bool, width int) string {
+	style := unfocusStyle
+	if focused {
+		style = focusStyle
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Left, previewstyle("Preview theme"), liststyle("Select colorscheme"))
+	menutext := fmt.Sprintf("│ %s ├", text)
+	size := len(menutext)
+
+	menutext += strings.Repeat("─", width-size+2)
+
+	return style(menutext)
+}
+
+func (m modelpreview) GetFocusedMenu() string {
+	previewmenu := m.GetMenuText("Preview theme", m.focusState == FOCUSPREVIEW, ansi.GetFullSize())
+	listmenu := m.GetMenuText("Select colorscheme", m.focusState == FOCUSLIST, m.termwidth-ansi.GetFullSize())
+	return lipgloss.JoinHorizontal(lipgloss.Left, previewmenu, listmenu)
 }
 
 func (m modelpreview) View() string {
@@ -214,18 +197,12 @@ func (m modelpreview) View() string {
 		return "\n  Initializing..."
 	}
 
-	preview := fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView())
-	focusmenu := m.GetFocusMenu()
+	preview := fmt.Sprintf("%s\n%s", m.viewport.View(), m.footerView())
+	focusmenu := m.GetFocusedMenu()
 
-	previwbloc := lipgloss.JoinHorizontal(lipgloss.Center, preview, verticalspace(""), m.list.View())
+	previwbloc := lipgloss.JoinHorizontal(lipgloss.Center, preview, verticalspace(" "), m.listview.View())
 
-	return lipgloss.JoinVertical(lipgloss.Top, focusmenu, previwbloc)
-}
-
-func (m modelpreview) headerView() string {
-	title := titleStyle.Render("Mr. Pager & Mme. pagers")
-	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
-	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
+	return lipgloss.JoinVertical(lipgloss.Top, focusmenu, "", previwbloc)
 }
 
 func (m modelpreview) footerView() string {
@@ -241,52 +218,11 @@ func max(a, b int) int {
 	return b
 }
 
-// func (m modellist) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-// 	switch msg := msg.(type) {
-// 	case tea.KeyMsg:
-// 		if msg.String() == "ctrl+c" {
-// 			return m, tea.Quit
-// 		}
-// 	case tea.WindowSizeMsg:
-// 		h, v := docStyle.GetFrameSize()
-// 		m.list.SetSize(msg.Width-h, msg.Height-v)
-// 	}
-
-// 	var cmd tea.Cmd
-// 	m.list, cmd = m.list.Update(msg)
-// 	return m, cmd
-// }
-
-// func (m modellist) View() string {
-// 	return docStyle.Render(m.list.View())
-// }
-
 func CheckError(err error) {
 	if err != nil {
 		log.Printf("error: %v", err)
 	}
 }
-
-// func WordWrap(text string, width int) string {
-// 	output := bytes.NewBufferString("")
-
-// 	posx := 0
-// 	for _, character := range text {
-// 		if character == '\n' {
-// 			posx = -1
-// 		} else {
-// 			if (posx % width) == width-1 {
-// 				posx = 0
-// 				fmt.Fprintf(output, "\n")
-// 			}
-// 		}
-
-// 		fmt.Fprintf(output, "%c", character)
-// 		posx += 1
-// 	}
-
-// 	return output.String()
-// }
 
 func TitleGenerator(text string, boxwidth int) string {
 	output := bytes.NewBufferString("")
@@ -295,21 +231,17 @@ func TitleGenerator(text string, boxwidth int) string {
 	leftspaces := (boxwidth - size) / 2
 	rightspaces := boxwidth - leftspaces - size
 
-	lineStyle := ansi.BG.
-		Foreground(lineColor)
+	lineStyle := lipgloss.NewStyle().Foreground(lineColor)
 
-	textStyle := ansi.BG.
-		Foreground(lipgloss.Color(ansi.DEFAULTFOREGROUND)).
+	textStyle := lipgloss.NewStyle().
 		Bold(true)
 
 	leftline := lineStyle.Render(strings.Repeat("─", leftspaces))
 	rightline := lineStyle.Render(strings.Repeat("─", rightspaces))
 
-	title := fmt.Sprintf("\n%s%s%s", leftline, textStyle.Render(" "+text+" "), rightline)
+	title := fmt.Sprintf("\n%s%s%s\n\n", leftline, textStyle.Render(" "+text+" "), rightline)
 
-	// fmt.Fprintln(output, "")
 	fmt.Fprintf(output, title)
-	fmt.Fprintln(output, ansi.BG.Render(fmt.Sprintf("%s\n%s", ansi.ANSILINE, ansi.ANSILINE)))
 
 	return output.String()
 }
@@ -338,8 +270,10 @@ func getAnsiContentFile(filename string) string {
 
 	output := TitleGenerator(lines[0], ansi.GetFullSize())
 	for _, line := range lines[1:] {
-		output += fmt.Sprintf("%s%s\n", line, ansi.ANSILINE)
+		output += fmt.Sprintf("%s\n", line)
 	}
+
+	output = strings.Replace(output, "\t", "   ", -1)
 
 	return output
 }
@@ -361,15 +295,13 @@ func OutputBar() string {
 	// 	Background(lipgloss.Color("#448844")).
 	// 	Foreground(lipgloss.Color("#884488"))
 
-	r, g, b, _ := lipgloss.Color(ansi.DEFAULTBACKGROUND).RGBA()
-
-	output = strings.Replace(output, "44m", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
-	output = strings.Replace(output, "[91", fmt.Sprintf("[38;2;%d;%d;%d", r/256, g/256, b/256), -1)
-	output = strings.Replace(output, "91m", fmt.Sprintf("38;2;%d;%d;%dm", r/256, g/256, b/256), -1)
-	output = strings.Replace(output, "91;", fmt.Sprintf("38;2;%d;%d;%d;", r/256, g/256, b/256), -1)
+	// output = strings.Replace(output, "44m", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
+	// output = strings.Replace(output, "[91", fmt.Sprintf("[38;2;%d;%d;%d", r/256, g/256, b/256), -1)
+	// output = strings.Replace(output, "91m", fmt.Sprintf("38;2;%d;%d;%dm", r/256, g/256, b/256), -1)
+	// output = strings.Replace(output, "91;", fmt.Sprintf("38;2;%d;%d;%d;", r/256, g/256, b/256), -1)
 
 	// you must replace ( [0m or [m ) by [;{BG}
-	output = strings.Replace(output, "{BG}", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
+	// output = strings.Replace(output, "{BG}", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
 
 	return output
 }
@@ -430,8 +362,8 @@ func main() {
 	// links := test.GetRessouresList()
 	// fmt.Println(links)
 	// return
-	fmt.Print(OutputBar())
-	return
+	// fmt.Print(OutputBar())
+	// return
 
 	// Load some text for our viewport
 	content := strings.Repeat(OutputBar()+"\n", 5)
@@ -451,10 +383,10 @@ func main() {
 	}
 
 	m := modelpreview{
-		content: string(content),
-		list:    list.New(items, list.NewDefaultDelegate(), 0, 0),
+		content:  string(content),
+		listview: list.New(items, list.NewDefaultDelegate(), 0, 0),
 	}
-	m.list.SetShowTitle(false)
+	m.listview.SetShowTitle(false)
 
 	p := tea.NewProgram(
 		m,

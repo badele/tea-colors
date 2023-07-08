@@ -1,19 +1,19 @@
 man - an interface to the system reference manuals
-[{BG}MAN(1)                                                                                                                 Manual pager utils
-[;{BG}
-[1m[36mNAME(B[;{BG}[;{BG}
-       man - an interface to the system reference manuals[;{BG}
-[;{BG}
-[1m[36mSYNOPSIS(B[;{BG}[;{BG}
-       [1m[36mman(B[;{BG} [[4m[1m[34mman[24m(B[;{BG} [4m[1m[34moptions[24m(B[;{BG}] [[[4m[1m[34msection[24m(B[;{BG}] [4m[1m[34mpage[24m(B[;{BG} ...] ...[;{BG}
-       [1m[36mman(B[;{BG} [1m[36m-k(B[;{BG} [[4m[1m[34mapropos[24m(B[;{BG} [4m[1m[34moptions[24m(B[;{BG}] [4m[1m[34mregexp[24m(B[;{BG} ...[;{BG}
-       [1m[36mman(B[;{BG} [1m[36m-K(B[;{BG} [[4m[1m[34mman[24m(B[;{BG} [4m[1m[34moptions[24m(B[;{BG}] [[4m[1m[34msection[24m(B[;{BG}] [4m[1m[34mterm[24m(B[;{BG} ...[;{BG}
-       [1m[36mman(B[;{BG} [1m[36m-f(B[;{BG} [[4m[1m[34mwhatis[24m(B[;{BG} [4m[1m[34moptions[24m(B[;{BG}] [4m[1m[34mpage[24m(B[;{BG} ...[;{BG}
-       [1m[36mman(B[;{BG} [1m[36m-l(B[;{BG} [[4m[1m[34mman[24m(B[;{BG} [4m[1m[34moptions[24m(B[;{BG}] [4m[1m[34mfile[24m(B[;{BG} ...[;{BG}
-       [1m[36mman(B[;{BG} [1m[36m-w(B[;{BG}|[1m[36m-W(B[;{BG} [[4m[1m[34mman[24m(B[;{BG} [4m[1m[34moptions[24m(B[;{BG}] [4m[1m[34mpage[24m(B[;{BG} ...[;{BG}
-[;{BG}
-[1m[36mDESCRIPTION(B[;{BG}[;{BG}
-       [1m[36mman(B[;{BG}  is  the  system's manual pager.  Each [4m[1m[34mpage[24m(B[;{BG} argument given to [1m[36mman(B[;{BG} is normally the name of a program, utility or function.  The [4m[1m[34mmanual[24m(B[;{BG} [4m[1m[34mpage[24m(B[;{BG} associated with each of these argu-[;{BG}
-       ments is then found and displayed.  A [4m[1m[34msection[24m(B[;{BG}, if provided, will direct [1m[36mman(B[;{BG} to look only in that [4m[1m[34msection[24m(B[;{BG} of the manual.  The default action is to search in all of  the  available[;{BG}
-       [4m[1m[34msections[24m(B[;{BG} following a pre-defined order (see [1m[36mDEFAULTS(B[;{BG}), and to show only the first [4m[1m[34mpage[24m(B[;{BG} found, even if [4m[1m[34mpage[24m(B[;{BG} exists in several [4m[1m[34msections[24m(B[;{BG}.[;{BG}
-[;{BG}
+MAN(1)                                                                                                                 Manual pager utils
+[0m
+[1m[36mNAME(B[0m[0m
+       man - an interface to the system reference manuals[0m
+[0m
+[1m[36mSYNOPSIS(B[0m[0m
+       [1m[36mman(B[0m [[4m[1m[34mman[24m(B[0m [4m[1m[34moptions[24m(B[0m] [[[4m[1m[34msection[24m(B[0m] [4m[1m[34mpage[24m(B[0m ...] ...[0m
+       [1m[36mman(B[0m [1m[36m-k(B[0m [[4m[1m[34mapropos[24m(B[0m [4m[1m[34moptions[24m(B[0m] [4m[1m[34mregexp[24m(B[0m ...[0m
+       [1m[36mman(B[0m [1m[36m-K(B[0m [[4m[1m[34mman[24m(B[0m [4m[1m[34moptions[24m(B[0m] [[4m[1m[34msection[24m(B[0m] [4m[1m[34mterm[24m(B[0m ...[0m
+       [1m[36mman(B[0m [1m[36m-f(B[0m [[4m[1m[34mwhatis[24m(B[0m [4m[1m[34moptions[24m(B[0m] [4m[1m[34mpage[24m(B[0m ...[0m
+       [1m[36mman(B[0m [1m[36m-l(B[0m [[4m[1m[34mman[24m(B[0m [4m[1m[34moptions[24m(B[0m] [4m[1m[34mfile[24m(B[0m ...[0m
+       [1m[36mman(B[0m [1m[36m-w(B[0m|[1m[36m-W(B[0m [[4m[1m[34mman[24m(B[0m [4m[1m[34moptions[24m(B[0m] [4m[1m[34mpage[24m(B[0m ...[0m
+[0m
+[1m[36mDESCRIPTION(B[0m[0m
+       [1m[36mman(B[0m  is  the  system's manual pager.  Each [4m[1m[34mpage[24m(B[0m argument given to [1m[36mman(B[0m is normally the name of a program, utility or function.  The [4m[1m[34mmanual[24m(B[0m [4m[1m[34mpage[24m(B[0m associated with each of these argu-[0m
+       ments is then found and displayed.  A [4m[1m[34msection[24m(B[0m, if provided, will direct [1m[36mman(B[0m to look only in that [4m[1m[34msection[24m(B[0m of the manual.  The default action is to search in all of  the  available[0m
+       [4m[1m[34msections[24m(B[0m following a pre-defined order (see [1m[36mDEFAULTS(B[0m), and to show only the first [4m[1m[34mpage[24m(B[0m found, even if [4m[1m[34mpage[24m(B[0m exists in several [4m[1m[34msections[24m(B[0m.[0m
+[0m

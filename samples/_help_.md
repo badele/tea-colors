@@ -1,5 +1,4 @@
-For converting your terminal output use the unbuffer command (in expect package)
-
+For converting your terminal output, use the unbuffer command (in expect package)
 
 ex:
 
