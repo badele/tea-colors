@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -62,6 +63,7 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 type modelpreview struct {
+	schemes    scheme.Schemes
 	content    string
 	ready      bool
 	termwidth  int
@@ -165,6 +167,12 @@ func (m modelpreview) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if m.focusState == FOCUSLIST {
 		m.listview, cmd = m.listview.Update(msg)
+		i := m.listview.Index()
+		if i > 0 {
+			m.viewport.SetContent(OutputBar(&m.schemes[i-1])) // -1 for the first item (current terminal theme)
+		} else {
+			m.viewport.SetContent(OutputBar(nil))
+		}
 	} else {
 		m.viewport, cmd = m.viewport.Update(msg)
 	}
@@ -278,11 +286,13 @@ func getAnsiContentFile(filename string) string {
 	return output
 }
 
-func OutputBar() string {
+func OutputBar(scheme *scheme.Scheme) string {
 	output := ansi.GetANSIColorBar()
 	output += ansi.GetANSI16ColorsPanel()
 	output += ansi.GetTextStylePanel()
 	output += ansi.GetGrayColorsPanel()
+
+	// return output
 
 	output += getAnsiContentFile("samples/duf.ans")
 	output += getAnsiContentFile("samples/exa.ans")
@@ -290,18 +300,69 @@ func OutputBar() string {
 	output += getAnsiContentFile("samples/man.ans")
 
 	// output += "\n\n"
+	if scheme != nil {
+		// r, g, b, _ := lipgloss.Color(scheme.Normal[0]).RGBA()
+		// 256 colors
+		// \[
 
-	// style := lipgloss.NewStyle().
-	// 	Background(lipgloss.Color("#448844")).
-	// 	Foreground(lipgloss.Color("#884488"))
+		// FGCODE := "{{FG}}"
+		// BGCODE := "{{BG}}"
 
-	// output = strings.Replace(output, "44m", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
-	// output = strings.Replace(output, "[91", fmt.Sprintf("[38;2;%d;%d;%d", r/256, g/256, b/256), -1)
-	// output = strings.Replace(output, "91m", fmt.Sprintf("38;2;%d;%d;%dm", r/256, g/256, b/256), -1)
-	// output = strings.Replace(output, "91;", fmt.Sprintf("38;2;%d;%d;%d;", r/256, g/256, b/256), -1)
+		///////////////
+		// Foreground
+		///////////////
+		for i := 0; i < 8; i++ {
 
-	// you must replace ( [0m or [m ) by [;{BG}
-	// output = strings.Replace(output, "{BG}", fmt.Sprintf("48;2;%d;%d;%dm", r/256, g/256, b/256), -1)
+			// Normal Color \[30m | \[30;40m
+			fgNormalRegex, _ := regexp.CompilePOSIX(fmt.Sprintf(`\[([0-9]+)?([;|m])?3%d([;m])`, i))
+			r, g, b, _ := lipgloss.Color(scheme.Normal[i]).RGBA()
+			output = fgNormalRegex.ReplaceAllString(output, fmt.Sprintf(`[${1}${2}{{FG38;2;%d;%d;%d}}`, r/256, g/256, b/256))
+
+			// Brights Color \[90m | \[90;40m
+			fgBrightsRegex, _ := regexp.CompilePOSIX(fmt.Sprintf(`\[([0-9]+)?([;|m])?9%d([;m])`, i))
+			r, g, b, _ = lipgloss.Color(scheme.Brights[i]).RGBA()
+			output = fgBrightsRegex.ReplaceAllString(output, fmt.Sprintf(`[${1}${2}{{FG38;2;%d;%d;%d}}`, r/256, g/256, b/256))
+
+		}
+
+		///////////////
+		// Background
+		///////////////
+		for i := 0; i < 8; i++ {
+			bgNormalRegex, _ := regexp.CompilePOSIX(fmt.Sprintf(`(\[)4%dm`, i))
+			r, g, b, _ := lipgloss.Color(scheme.Normal[i]).RGBA()
+			output = bgNormalRegex.ReplaceAllString(output, fmt.Sprintf(`${1}{{BG48;2;%d;%d;%d}}`, r/256, g/256, b/256))
+
+			bgNormalRegex, _ = regexp.CompilePOSIX(fmt.Sprintf(`(\[.*?}})4%dm`, i))
+			r, g, b, _ = lipgloss.Color(scheme.Normal[i]).RGBA()
+			output = bgNormalRegex.ReplaceAllString(output, fmt.Sprintf(`${1}{{BG48;2;%d;%d;%d}}`, r/256, g/256, b/256))
+
+			bgBrightsRegex, _ := regexp.CompilePOSIX(fmt.Sprintf(`(\[)10%dm`, i))
+			r, g, b, _ = lipgloss.Color(scheme.Brights[i]).RGBA()
+			output = bgBrightsRegex.ReplaceAllString(output, fmt.Sprintf(`${1}{{BG48;2;%d;%d;%d}}`, r/256, g/256, b/256))
+
+			bgBrightsRegex, _ = regexp.CompilePOSIX(fmt.Sprintf(`(\[.*?}})10%dm`, i))
+			r, g, b, _ = lipgloss.Color(scheme.Brights[i]).RGBA()
+			output = bgBrightsRegex.ReplaceAllString(output, fmt.Sprintf(`${1}{{BG48;2;%d;%d;%d}}`, r/256, g/256, b/256))
+		}
+
+		// TODO: in unit test, check the {{ / }} symbols not is present in the *.ans file
+		sepregex, _ := regexp.CompilePOSIX(`}}{{`)
+		output = sepregex.ReplaceAllString(output, ";")
+
+		endregex, _ := regexp.CompilePOSIX(`}}`)
+		output = endregex.ReplaceAllString(output, "m")
+
+		testregex, _ := regexp.CompilePOSIX(`FG38;2`)
+		output = testregex.ReplaceAllString(output, "38;2")
+
+		testregex, _ = regexp.CompilePOSIX(`BG48;2`)
+		output = testregex.ReplaceAllString(output, "48;2")
+
+		beginregex, _ := regexp.CompilePOSIX(`{{`)
+		output = beginregex.ReplaceAllString(output, "")
+
+	}
 
 	return output
 }
@@ -362,19 +423,21 @@ func main() {
 	// links := test.GetRessouresList()
 	// fmt.Println(links)
 	// return
-	// fmt.Print(OutputBar())
-	// return
 
 	// Load some text for our viewport
-	content := strings.Repeat(OutputBar()+"\n", 5)
-
-	newsschemes := scheme.Schemes{}
-	newsschemes.Read("schemes.txt")
+	schemeslist := scheme.Schemes{}
+	schemeslist.Read("schemes.txt")
 	items := []list.Item{
 		item{title: "Current", desc: GetItemBarColor(nil)},
 	}
 
-	for _, scheme := range newsschemes {
+	// fmt.Print(OutputBar(nil))
+	// return
+
+	// fmt.Print(OutputBar(&schemeslist[195]))
+	// return
+
+	for _, scheme := range schemeslist {
 		colors := []string{}
 		colors = append(colors, scheme.Normal...)
 		colors = append(colors, scheme.Brights...)
@@ -382,8 +445,11 @@ func main() {
 		items = append(items, item{title: scheme.Name, desc: GetItemBarColor(colors)})
 	}
 
+	content := strings.Repeat(OutputBar(nil)+"\n", 5)
+
 	m := modelpreview{
-		content:  string(content),
+		schemes:  schemeslist,
+		content:  content,
 		listview: list.New(items, list.NewDefaultDelegate(), 0, 0),
 	}
 	m.listview.SetShowTitle(false)

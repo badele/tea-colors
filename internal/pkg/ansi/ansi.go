@@ -30,9 +30,9 @@ var (
 		"bold",
 		"faint",
 		"italic",
-		"overline",
-		"crossout",
-		"underline",
+		// "overline",
+		// "crossout",
+		// "underline",
 		"blink",
 	}
 )
@@ -87,42 +87,6 @@ func GetFullSize() int {
 	return GetStartPosX() + 1 + GetAllWidth()
 }
 
-// func GetGlobalConf(colornames []string, textstyles []string) GlobalConfig {
-// 	globalconfig := GlobalConfig{}
-
-// 	// // Get max ANSI color names width
-// 	// GetMaxColorNameWidth() = 0
-// 	// for _, colname := range colornames {
-// 	// 	size := len(colname)
-// 	// 	if size > GetMaxColorNameWidth() {
-// 	// 		GetMaxColorNameWidth() = size
-// 	// 	}
-// 	// }
-
-// 	// // Get max ANSI style names width
-// 	// GetMaxStyleNameWidth() = 0
-// 	// for _, colname := range textstyles {
-// 	// 	size := len(colname)
-// 	// 	if size > GetMaxStyleNameWidth() {
-// 	// 		GetMaxStyleNameWidth() = size
-// 	// 	}
-// 	// }
-
-// 	// Get max widh (MaxColorNameWidth, MaxStyleNameWidth)
-// 	// GetStartPosX() = GetMaxColorNameWidth()
-// 	// if GetMaxStyleNameWidth() > GetMaxColorNameWidth() {
-// 	// 	GetStartPosX() = GetMaxStyleNameWidth()
-// 	// }
-
-// 	// Box color preview width
-// 	// GetAllWidth() = ((GetMaxColorNameWidth() + 1) * 16) // Ignore last space
-
-// 	// Max preview size
-// 	// globalconfig.FullSize = GetStartPosX() + 1 + GetAllWidth()
-
-// 	return globalconfig
-// }
-
 func GetANSIColorBar() string {
 	nbcolors := 16
 
@@ -165,16 +129,16 @@ func GetANSI16ColorsPanel() string {
 	fmt.Fprintf(output, lipgloss.JoinHorizontal(lipgloss.Center, tools.StrPad(tools.RIGHT, "", GetMaxStyleNameWidth()), tools.StrPad(tools.CENTER, "Normal", GetAllWidth()/2), " ", tools.StrPad(tools.CENTER, "Bright", GetAllWidth()/2)))
 	fmt.Fprintf(output, "\n")
 
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "ANSI", GetMaxStyleNameWidth()))
+	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "ANSI", GetStartPosX()))
 	for idx := 0; idx < nbcolors; idx += 1 {
-		fmt.Fprintf(output, "%s%s", " ", tools.StrPad(tools.CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), GetMaxColorNameWidth()))
+		fmt.Fprintf(output, "%s%s", " ", tools.StrPad(tools.CENTER, strings.ToUpper(fmt.Sprintf("%02x", idx)), GetStartPosX()))
 	}
 	// fmt.Fprintf(output, " "))
 	fmt.Fprintf(output, "\n")
 
-	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "Color", GetMaxStyleNameWidth()))
+	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "Color", GetStartPosX()))
 	for idx := 0; idx < nbcolors; idx += 1 {
-		fmt.Fprintf(output, "%s%s", " ", tools.StrPad(tools.CENTER, COLORNAMES[idx%(nbcolors/2)], GetMaxColorNameWidth()))
+		fmt.Fprintf(output, "%s%s", " ", tools.StrPad(tools.CENTER, COLORNAMES[idx%(nbcolors/2)], GetStartPosX()))
 	}
 	fmt.Fprintf(output, "\n")
 
@@ -186,7 +150,7 @@ func GetANSI16ColorsPanel() string {
 		SetString(tools.StrPad(tools.CENTER, "•••", GetMaxColorNameWidth()))
 
 	for row := 0; row < nbcolors; row++ {
-		fmt.Fprintf(output, tools.StrPad(tools.RIGHT, COLORNAMES[row%(nbcolors/2)], GetMaxStyleNameWidth()))
+		fmt.Fprintf(output, tools.StrPad(tools.RIGHT, COLORNAMES[row%(nbcolors/2)], GetStartPosX()))
 		for col := 0; col < nbcolors; col += 1 {
 			fmt.Fprintf(output, "%s%s", " ", style.Foreground(lipgloss.Color(strconv.Itoa(row))).Background(lipgloss.Color(strconv.Itoa(col))))
 		}
@@ -200,31 +164,28 @@ func GetANSI16ColorsPanel() string {
 func GetTextStylePanel() string {
 	nbcolors := 16
 
-	style := lipgloss.NewStyle().
-		SetString(tools.StrPad(tools.CENTER, tools.StrPad(tools.CENTER, "ABC", GetMaxColorNameWidth()), GetMaxColorNameWidth()))
+	textcontent := tools.StrPad(tools.CENTER, tools.StrPad(tools.CENTER, "ABC", GetMaxColorNameWidth()), GetMaxColorNameWidth())
 
 	output := bytes.NewBufferString("")
 	for row, _ := range TEXTSTYLES {
-		fmt.Fprintf(output, tools.StrPad(tools.RIGHT, TEXTSTYLES[row], GetMaxStyleNameWidth()))
+		fmt.Fprintf(output, tools.StrPad(tools.RIGHT, TEXTSTYLES[row], GetStartPosX()))
 		for col := 0; col < nbcolors; col += 1 {
-			termfunc := style.Foreground(lipgloss.Color(strconv.Itoa(col)))
+			style := lipgloss.NewStyle().Foreground(lipgloss.Color(strconv.Itoa(col)))
 			switch TEXTSTYLES[row] {
 			case "bold":
-				fmt.Fprintf(output, "%s%s", " ", termfunc.Bold(true))
+				fmt.Fprintf(output, "%s%s", " ", style.Bold(true).Render(textcontent))
 			case "faint":
-				fmt.Fprintf(output, "%s%s", " ", termfunc.Faint(true))
+				fmt.Fprintf(output, "%s%s", " ", style.Faint(true).Render(textcontent))
 			case "italic":
-				fmt.Fprintf(output, "%s%s", " ", termfunc.Italic(true))
-			case "crossOut":
-				fmt.Fprintf(output, "%s%s", " ", termfunc.Strikethrough(true))
-			case "underline":
-				fmt.Fprintf(output, "%s%s", " ", termfunc.Underline(true))
-			// case "overline":
-			// 	fmt.Fprintf(output, "%s%s", " ", termfunc.Overline())
+				fmt.Fprintf(output, "%s%s", " ", style.Italic(true).Render(textcontent))
+			// case "crossout":
+			// 	fmt.Fprintf(output, "%s%s", " ", style.Strikethrough(true).Render(textcontent))
+			// case "underline":
+			// 	fmt.Fprintf(output, "%s%s", " ", style.Underline(true).Render(textcontent))
 			case "blink":
-				fmt.Fprintf(output, "%s%s", " ", termfunc.Blink(true))
+				fmt.Fprintf(output, "%s%s", " ", style.Blink(true).Render(textcontent))
 			default:
-				fmt.Fprintf(output, "%s%s", " ", termfunc)
+				fmt.Fprintf(output, "%s%s", " ", style.Render(textcontent))
 			}
 		}
 		fmt.Fprintf(output, "\n")
@@ -239,10 +200,12 @@ func GetGrayColorsPanel() string {
 	spaces := (GetAllWidth() - (bandsize * (nbcolors / 2))) / 2
 
 	output := bytes.NewBufferString("")
+
+	// Line 1
 	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces))
 	for idx := 232; idx <= 232+nbcolors/2-1; idx += 1 {
 		style := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("15")).
+			Foreground(lipgloss.Color("255")).
 			Background(lipgloss.Color(strconv.Itoa(idx))).
 			SetString(tools.StrPad(tools.CENTER, strconv.Itoa(idx), bandsize))
 
@@ -251,10 +214,11 @@ func GetGrayColorsPanel() string {
 	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "", GetFullSize()-(bandsize*(nbcolors/2))-GetStartPosX()-spaces-2))
 	fmt.Fprintf(output, "\n")
 
+	// Line 2
 	fmt.Fprintf(output, tools.StrPad(tools.RIGHT, "", GetStartPosX()+1+spaces))
 	for idx := 232 + nbcolors/2; idx <= 255; idx += 1 {
 		style := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("0")).
+			Foreground(lipgloss.Color("232")).
 			Background(lipgloss.Color(strconv.Itoa(idx))).
 			SetString(tools.StrPad(tools.CENTER, strconv.Itoa(idx), bandsize))
 
